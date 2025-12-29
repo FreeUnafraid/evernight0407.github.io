@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元旦祝福信</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: white;
+            text-align: center;
+        }
+
+        /* 雪花容器 - 全屏覆盖 */
+        #snow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 雪花 */
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* 信封 */
+        #envelope-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background: #e74c3c;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            z-index: 20;
+        }
+
+        .envelope:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: #c0392b;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+        }
+
+        .envelope-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            text-align: center;
+            width: 80%;
+            line-height: 1.4;
+        }
+
+        /* 输入框 */
+        #input-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #input-section.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .input-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .input-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .name-input:focus {
+            border-color: #e74c3c;
+        }
+
+        .submit-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #c0392b;
+        }
+
+        /* 祝福语 */
+        #message-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        #message-section.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .to-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .blessing {
+            font-size: 20px;
+            line-height: 1.6;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 好感度 */
+        #favor-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        #favor-section.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .favor-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #ffd700;
+        }
+
+        .heart-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .heart {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 1s ease;
+        }
+
+        .favor-text {
+            font-size: 22px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 按钮 */
+        .continue-btn {
+            margin-top: 30px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .continue-btn:hover {
+            background: rgba(192, 57, 43, 0.9);
+            transform: scale(1.05);
+        }
+
+        /* 隐藏雪花和信封的类 */
+        .hide-snow #snow-container {
+            display: none;
+        }
+
+        .hide-envelope #envelope-container {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .envelope {
+                width: 280px;
+                height: 180px;
+            }
+            
+            .envelope-text {
+                font-size: 20px;
+            }
+            
+            .to-name {
+                font-size: 24px;
+            }
+            
+            .blessing {
+                font-size: 18px;
+            }
+            
+            .favor-title {
+                font-size: 24px;
+            }
+            
+            .favor-text {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .envelope {
+                width: 250px;
+                height: 160px;
+            }
+            
+            .envelope-text {
+                font-size: 18px;
+            }
+            
+            .input-box {
+                padding: 20px;
+            }
+            
+            .name-input {
+                font-size: 16px;
+                padding: 10px 12px;
+            }
+            
+            .submit-btn, .continue-btn {
+                font-size: 16px;
+                padding: 10px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 雪花容器 -->
+    <div id="snow-container"></div>
+
+    <!-- 信封 -->
+    <div id="envelope-container">
+        <div class="envelope" id="envelope">
+            <div class="envelope-text">元旦快乐<br>点我看看</div>
+        </div>
+    </div>
+
+    <!-- 输入名字 -->
+    <div id="input-section">
+        <div class="input-box">
+            <div class="input-title">请输入你的名字</div>
+            <input type="text" class="name-input" id="name-input" placeholder="例如：小明">
+            <button class="submit-btn" id="submit-btn">确认</button>
+        </div>
+    </div>
+
+    <!-- 祝福语 -->
+    <div id="message-section">
+        <div class="to-name" id="to-name">TO 小明</div>
+        <div class="blessing" id="blessing">
+            新的一年，愿你如星辰般闪耀，如春风般温暖。<br><br>
+            愿所有美好如期而至，所有努力都有回报，<br>
+            所有梦想都能实现，所有期待都不被辜负。<br><br>
+            元旦快乐！愿2026年带给你无限惊喜与幸福！
+        </div>
+        <button class="continue-btn" id="continue-btn">继续</button>
+    </div>
+
+    <!-- 好感度 -->
+    <div id="favor-section">
+        <div class="favor-title">你的好感度</div>
+        <div class="heart-container">
+            <div class="heart" id="heart">❤</div>
+        </div>
+        <div class="favor-text" id="favor-text">正在计算中...</div>
+    </div>
+
+    <script>
+        // 雪花系统 - 使用 requestAnimationFrame 实现流畅动画
+        class SnowflakeSystem {
+            constructor(container) {
+                this.container = container;
+                this.snowflakes = [];
+                this.running = true;
+                this.init();
+            }
+            
+            init() {
+                this.createSnowflakes(100);
+                this.animate();
+            }
+            
+            createSnowflakes(count) {
+                for (let i = 0; i < count; i++) {
+                    this.createSnowflake();
+                }
+            }
+            
+            createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                
+                // 随机大小 (2-12px)
+                const size = Math.random() * 10 + 2;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                
+                // 随机起始位置 (全屏范围)
+                const startX = Math.random() * window.innerWidth;
+                const startY = -size;
+                
+                // 雪花数据
+                const snowflakeData = {
+                    element: snowflake,
+                    x: startX,
+                    y: startY,
+                    size: size,
+                    speedY: Math.random() * 2 + 1, // 1-3px/帧
+                    speedX: (Math.random() - 0.5) * 2, // -1 到 1px/帧
+                    swing: Math.random() * Math.PI * 2, // 随机相位
+                    swingSpeed: 0.01 + Math.random() * 0.02, // 摆动速度
+                    opacity: Math.random() * 0.5 + 0.3
+                };
+                
+                snowflake.style.left = `${startX}px`;
+                snowflake.style.top = `${startY}px`;
+                snowflake.style.opacity = snowflakeData.opacity;
+                
+                this.container.appendChild(snowflake);
+                this.snowflakes.push(snowflakeData);
+            }
+            
+            update() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                
+                this.snowflakes.forEach(sf => {
+                    // 更新位置
+                    sf.y += sf.speedY;
+                    sf.x += sf.speedX + Math.sin(sf.swing) * 0.5; // 添加摆动
+                    sf.swing += sf.swingSpeed;
+                    
+                    // 边界处理 - 从底部重新进入顶部
+                    if (sf.y > height + sf.size) {
+                        sf.y = -sf.size;
+                        sf.x = Math.random() * width;
+                    }
+                    // 左右边界循环
+                    if (sf.x < -sf.size) {
+                        sf.x = width + sf.size;
+                    } else if (sf.x > width + sf.size) {
+                        sf.x = -sf.size;
+                    }
+                    
+                    // 更新DOM位置
+                    sf.element.style.transform = `translate(${sf.x}px, ${sf.y}px)`;
+                });
+            }
+            
+            animate() {
+                if (!this.running) return;
+                
+                this.update();
+                requestAnimationFrame(() => this.animate());
+            }
+            
+            stop() {
+                this.running = false;
+            }
+            
+            start() {
+                if (!this.running) {
+                    this.running = true;
+                    this.animate();
+                }
+            }
+        }
+        
+        // 页面状态管理
+        let currentState = 'envelope'; // envelope, input, message, favor
+        let userName = '';
+        let favorLevel = 0;
+        let snowflakeSystem = null;
+        
+        // DOM元素
+        const snowContainer = document.getElementById('snow-container');
+        const envelope = document.getElementById('envelope');
+        const inputSection = document.getElementById('input-section');
+        const messageSection = document.getElementById('message-section');
+        const favorSection = document.getElementById('favor-section');
+        const nameInput = document.getElementById('name-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        const toName = document.getElementById('to-name');
+        const heart = document.getElementById('heart');
+        const favorText = document.getElementById('favor-text');
+        const body = document.body;
+        
+        // 事件处理
+        envelope.addEventListener('click', () => {
+            if (currentState === 'envelope') {
+                currentState = 'input';
+                inputSection.classList.add('active');
+            } else if (currentState === 'message') {
+                showFavorSection();
+            }
+        });
+        
+        submitBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                userName = name;
+                showMessageSection();
+            } else {
+                nameInput.placeholder = '请输入名字哦~';
+                nameInput.style.borderColor = '#e74c3c';
+                setTimeout(() => {
+                    nameInput.style.borderColor = '#ddd';
+                }, 2000);
+            }
+        });
+        
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+        
+        continueBtn.addEventListener('click', () => {
+            showFavorSection();
+        });
+        
+        // 显示祝福语部分
+        function showMessageSection() {
+            currentState = 'message';
+            inputSection.classList.remove('active');
+            toName.textContent = `TO ${userName}`;
+            messageSection.classList.add('active');
+            
+            // 隐藏信封和雪花
+            body.classList.add('hide-envelope', 'hide-snow');
+            if (snowflakeSystem) {
+                snowflakeSystem.stop();
+            }
+        }
+        
+        // 显示好感度部分
+        function showFavorSection() {
+            currentState = 'favor';
+            messageSection.classList.remove('active');
+            
+            // 计算好感度（-100到100之间的随机数）
+            favorLevel = Math.floor(Math.random() * 201) - 100;
+            
+            // 设置心形大小和颜色
+            const size = Math.abs(favorLevel) * 0.5 + 50; // 50-100px
+            heart.style.fontSize = `${size}px`;
+            heart.style.color = favorLevel >= 0 ? '#e74c3c' : '#333';
+            
+            // 设置好感度文字
+            let text = '';
+            if (favorLevel >= 80) {
+                text = `❤️ 满分好感！你是最棒的！(${favorLevel})`;
+            } else if (favorLevel >= 60) {
+                text = `💕 超级喜欢你！(${favorLevel})`;
+            } else if (favorLevel >= 40) {
+                text = `💖 非常喜欢你！(${favorLevel})`;
+            } else if (favorLevel >= 20) {
+                text = `💗 很喜欢你！(${favorLevel})`;
+            } else if (favorLevel >= 0) {
+                text = `❤ 很喜欢你！(${favorLevel})`;
+            } else if (favorLevel >= -20) {
+                text = `🖤 还需要多了解你~ (${favorLevel})`;
+            } else if (favorLevel >= -40) {
+                text = `🖤 保持距离，慢慢来~ (${favorLevel})`;
+            } else if (favorLevel >= -60) {
+                text = `🖤 需要更多时间了解你... (${favorLevel})`;
+            } else {
+                text = `🖤 好感度需要努力提升哦！(${favorLevel})`;
+            }
+            
+            favorText.innerHTML = text;
+            favorSection.classList.add('active');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 创建雪花系统
+            snowflakeSystem = new SnowflakeSystem(snowContainer);
+            
+            // 窗口大小改变时重新调整
+            window.addEventListener('resize', () => {
+                // 雪花系统会自动适应，因为使用了 window.innerWidth/Height
+            });
+        });
+    </script>
+</body>
+</html>
+
